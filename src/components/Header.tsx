@@ -1,11 +1,8 @@
 import React, { useRef } from 'react';
 import { validateJsonStructure } from '../helpers/helpers';
+import { updateStoreData } from '../dataStore.ts/dataStore';
 
-interface HeaderProps {
-  onDataUpload: (data: any) => void;
-}
-
-export const Header: React.FC<HeaderProps> = ({ onDataUpload }) => {
+export const Header: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onImportClick = () => {
@@ -20,7 +17,7 @@ export const Header: React.FC<HeaderProps> = ({ onDataUpload }) => {
         try {
           const json = JSON.parse(e.target?.result as string);
           if (validateJsonStructure(json)) {
-            onDataUpload(json);
+            updateStoreData(json);
             console.log("Valid JSON structure uploaded");
           } else {
             console.error("Invalid JSON structure");

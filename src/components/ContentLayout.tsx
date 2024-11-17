@@ -4,13 +4,12 @@ import { Footer } from './Footer';
 
 interface ContentLayoutProps {
   children: ReactNode;
-  onDataUpload: (data: any) => void;
 }
 
-export const ContentLayout: React.FC<ContentLayoutProps> = ({ children, onDataUpload }) => {
+export const ContentLayout: React.FC<ContentLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header onDataUpload={onDataUpload} />
+      <Header />
       <main className="flex-grow mt-20 mb-16 px-4">
         {children}
       </main>

@@ -5,15 +5,58 @@ import { LoanCardType, Loan } from '../schema/schema';
 import { MonetaryNode } from './MonetaryNode';
 import { deleteLoan } from '../services/loanService';
 import { Modal } from './Modal';
+import { getStoreData, subscribeToStore } from '../dataStore.ts/dataStore';
 
-interface LoanAccordionProps {
-  loanData: LoanCardType;
-}
-
-export const LoanAccordion: React.FC<LoanAccordionProps> = ({ loanData }) => {
+export const LoanAccordion: React.FC = () => {
+  const [loanData, setLoanData] = useState<LoanCardType | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentLoan, setCurrentLoan] = useState<Loan | null>(null);
+  const [accordionItems, setAccordionItems] = useState<AccordionChildType[]>([]);
+
+  useEffect(() => {
+    const updateLoanData = () => {
+      const storeData = getStoreData();
+      setLoanData({
+        title: "Existing Loans",
+        description: "Your current loans",
+        monetaryValues: storeData.loans,
+        onClick: handleOpenAddModal
+      });
+    };
+  
+    updateLoanData(); // Initial data load
+    const unsubscribe = subscribeToStore(updateLoanData);
+  
+    return () => unsubscribe(); // Cleanup subscription on unmount
+  }, []);
+
+  useEffect(() => {
+    if (loanData) {
+      setAccordionItems([
+        {
+          title: loanData.title,
+          content: (
+            <MonetaryCard
+              title={loanData.title}
+              description={loanData.description}
+              monetaryValues={loanData.monetaryValues.map(loan => (
+                <MonetaryNode
+                  key={loan.id}
+                  item={loan}
+                  onEdit={() => handleOpenEditModal(loan)}
+                  onClear={(id) => handleClear(id)}
+                />
+              ))}
+              onClick={handleOpenAddModal}
+            />
+          ),
+          isOpen: true,
+          onClick: () => toggleAccordion(0)
+        }
+      ]);
+    }
+  }, [loanData]);
 
   const handleOpenAddModal = () => {
     setIsAddModalOpen(true);
@@ -48,33 +91,6 @@ export const LoanAccordion: React.FC<LoanAccordionProps> = ({ loanData }) => {
       // Refresh loan data here
     }
   };
-
-  const [accordionItems, setAccordionItems] = useState<AccordionChildType[]>([]);
-
-  useEffect(() => {
-    setAccordionItems([
-      {
-        title: loanData.title,
-        content: (
-          <MonetaryCard
-            title={loanData.title}
-            description={loanData.description}
-            monetaryValues={loanData.monetaryValues.map(loan => (
-              <MonetaryNode
-                key={loan.id}
-                item={loan}
-                onEdit={() => handleOpenEditModal(loan)}
-                onClear={(id) => handleClear(id)}
-              />
-            ))}
-            onClick={handleOpenAddModal}
-          />
-        ),
-        isOpen: true,
-        onClick: () => toggleAccordion(0)
-      }
-    ]);
-  }, [loanData]);
 
   const handleClear = async (id: string) => {
     try {

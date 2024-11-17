@@ -17,6 +17,11 @@ export function generateGuid(): string {
   });
 }
 
+export const validateFilename = (name: string) => {
+  const regex = /^[a-zA-Z0-9_-]+\.json$/;
+  return regex.test(name);
+};
+
 export const getLoanData = (): LoanCardType => {
   return {
     title: "Existing Loans",
