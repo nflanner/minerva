@@ -3,7 +3,7 @@ import { Accordion, AccordionChildType } from './Accordion';
 import { MonetaryCard } from './MonetaryCard';
 import { ExpenseCardType, FinancialItem } from '../schema/schema';
 import { MonetaryNode } from './MonetaryNode';
-import { deleteExpense } from '../services/expenseService';
+import { deleteExpense, getExpenses } from '../services/expenseService';
 import { getStoreData, subscribeToStore, updateStoreData } from '../dataStore.ts/dataStore';
 
 export const ExpenseAccordion: React.FC = () => {
@@ -11,11 +11,11 @@ export const ExpenseAccordion: React.FC = () => {
   const [accordionItems, setAccordionItems] = useState<AccordionChildType[]>([]);
 
   const updateExpenseData = useCallback(() => {
-    const storeData = getStoreData();
+    const monthlyExpenses = getExpenses();
     setExpenseData({
       title: "Monthly Expenses",
       description: "Your recurring monthly expenses",
-      monetaryValues: storeData.monthlyExpenses,
+      monetaryValues: monthlyExpenses,
       onClick: () => console.log("Adding new monthly expense")
     });
   }, []);

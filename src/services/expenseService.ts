@@ -1,28 +1,28 @@
+import { getStoreData, updateStoreData } from '../dataStore.ts/dataStore';
 import { FinancialItem } from '../schema/schema';
-import { readData, writeData, LocalData } from './dataService';
 
 export const getExpenses = (): FinancialItem[] => {
-  const data = readData();
+  const data = getStoreData();
   return data.monthlyExpenses;
 };
 
 export const addExpense = async (expense: FinancialItem): Promise<void> => {
-  const data = readData();
+  const data = getStoreData();
   data.monthlyExpenses.push(expense);
-  await writeData(data);
+  await updateStoreData(data);
 };
 
 export const updateExpense = async (updatedExpense: FinancialItem): Promise<void> => {
-  const data = readData();
+  const data = getStoreData();
   const index = data.monthlyExpenses.findIndex(expense => expense.id === updatedExpense.id);
   if (index !== -1) {
     data.monthlyExpenses[index] = updatedExpense;
-    await writeData(data);
+    await updateStoreData(data);
   }
 };
 
 export const deleteExpense = async (id: string): Promise<void> => {
-  const data = readData();
+  const data = getStoreData();
   data.monthlyExpenses = data.monthlyExpenses.filter(expense => expense.id !== id);
-  await writeData(data);
+  await updateStoreData(data);
 };

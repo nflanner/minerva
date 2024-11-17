@@ -1,14 +1,3 @@
-import {
-  Loan,
-  Cadence,
-  LoanCardType,
-  ExpenseCardType,
-  IncomeCardType,
-  Expense,
-  Income
-} from "../schema/schema";
-import localData from '../../local-data/local-data.json';
-
 export function generateGuid(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random() * 16 | 0,
@@ -20,33 +9,6 @@ export function generateGuid(): string {
 export const validateFilename = (name: string) => {
   const regex = /^[a-zA-Z0-9_-]+\.json$/;
   return regex.test(name);
-};
-
-export const getLoanData = (): LoanCardType => {
-  return {
-    title: "Existing Loans",
-    description: "Your current loans",
-    monetaryValues: [],
-    onClick: () => console.log("Adding new loan"),
-  };
-};
-
-export const getExpenseData = (): ExpenseCardType => {
-  return {
-    title: "Monthly Expenses",
-    description: "Recurring monthly costs",
-    monetaryValues: [],
-    onClick: () => console.log("Adding new monthly expense"),
-  };
-};
-
-export const getIncomeData = (): IncomeCardType => {
-  return {
-    title: "Monthly Income",
-    description: "Recurring monthly income",
-    monetaryValues: [],
-    onClick: () => console.log("Adding new monthly income"),
-  };
 };
 
 export const validateJsonStructure = (json: any): boolean => {

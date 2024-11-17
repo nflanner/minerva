@@ -3,9 +3,9 @@ import { Accordion, AccordionChildType } from './Accordion';
 import { MonetaryCard } from './MonetaryCard';
 import { LoanCardType, Loan } from '../schema/schema';
 import { MonetaryNode } from './MonetaryNode';
-import { deleteLoan } from '../services/loanService';
+import { deleteLoan, getLoans } from '../services/loanService';
 import { Modal } from './Modal';
-import { getStoreData, subscribeToStore } from '../dataStore.ts/dataStore';
+import { subscribeToStore } from '../dataStore.ts/dataStore';
 
 export const LoanAccordion: React.FC = () => {
   const [loanData, setLoanData] = useState<LoanCardType | null>(null);
@@ -16,11 +16,11 @@ export const LoanAccordion: React.FC = () => {
 
   useEffect(() => {
     const updateLoanData = () => {
-      const storeData = getStoreData();
+      const loans = getLoans();
       setLoanData({
         title: "Existing Loans",
         description: "Your current loans",
-        monetaryValues: storeData.loans,
+        monetaryValues: loans,
         onClick: handleOpenAddModal
       });
     };

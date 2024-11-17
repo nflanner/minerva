@@ -3,7 +3,7 @@ import { Accordion, AccordionChildType } from './Accordion';
 import { MonetaryCard } from './MonetaryCard';
 import { IncomeCardType, FinancialItem } from '../schema/schema';
 import { MonetaryNode } from './MonetaryNode';
-import { deleteIncome } from '../services/incomeServices';
+import { deleteIncome, getIncome } from '../services/incomeServices';
 import { getStoreData, subscribeToStore, updateStoreData } from '../dataStore.ts/dataStore';
 
 export const IncomeAccordion: React.FC = () => {
@@ -11,11 +11,11 @@ export const IncomeAccordion: React.FC = () => {
   const [accordionItems, setAccordionItems] = useState<AccordionChildType[]>([]);
 
   const updateIncomeData = useCallback(() => {
-    const storeData = getStoreData();
+    const income = getIncome();
     setIncomeData({
       title: "Monthly Income",
       description: "Your recurring monthly income",
-      monetaryValues: storeData.monthlyIncome,
+      monetaryValues: income,
       onClick: () => console.log("Adding new monthly income")
     });
   }, []);
