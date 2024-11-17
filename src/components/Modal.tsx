@@ -3,7 +3,7 @@ import React, { ReactNode } from 'react';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: () => void;
+  onSubmit: (...args: any[]) => void;
   title: string;
   children: ReactNode;
 }

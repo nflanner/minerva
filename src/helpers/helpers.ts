@@ -17,7 +17,7 @@ export const validateJsonStructure = (json: any): boolean => {
     Array.isArray(json.loans) &&
     Array.isArray(json.monthlyExpenses) &&
     Array.isArray(json.monthlyIncome) &&
-    json.loans.every((loan: any) => 
+    json.loans.every((loan: any) =>
       typeof loan.name === 'string' &&
       typeof loan.amount === 'number' &&
       typeof loan.interestRate === 'number' &&
@@ -35,4 +35,5 @@ export const validateJsonStructure = (json: any): boolean => {
     )
   );
 };
+
 

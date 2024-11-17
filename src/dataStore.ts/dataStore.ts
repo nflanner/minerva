@@ -1,3 +1,4 @@
+import { generateGuid } from "../helpers/helpers";
 import { LocalData } from "../services/dataService";
 
 let currentData: LocalData = {
@@ -15,10 +16,21 @@ export const subscribeToStore = (listener: () => void) => {
   };
 };
 
-export const updateStoreData = (newData: LocalData) => {
-  currentData = newData;
+export const updateStoreData = (data: LocalData): void => {
+  const ensureGuid = (item: any) => ({
+    ...item,
+    id: item.id || generateGuid()
+  });
+
+  const updatedData = {
+    ...data,
+    loans: data.loans.map(ensureGuid),
+    monthlyExpenses: data.monthlyExpenses.map(ensureGuid),
+    monthlyIncome: data.monthlyIncome.map(ensureGuid)
+  };
+
+  currentData = updatedData;
   listeners.forEach(listener => listener());
-  console.log('Data updated:', currentData);
 };
 
 export const getStoreData = (): LocalData => {

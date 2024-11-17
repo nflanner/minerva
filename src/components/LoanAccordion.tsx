@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Accordion, AccordionChildType } from './Accordion';
 import { MonetaryCard } from './MonetaryCard';
 import { LoanCardType, Loan } from '../schema/schema';
 import { MonetaryNode } from './MonetaryNode';
-import { deleteLoan, getLoans } from '../services/loanService';
+import { addLoan, deleteLoan, getLoans, updateLoan } from '../services/loanService';
 import { Modal } from './Modal';
 import { subscribeToStore } from '../dataStore.ts/dataStore';
 
@@ -14,22 +14,21 @@ export const LoanAccordion: React.FC = () => {
   const [currentLoan, setCurrentLoan] = useState<Loan | null>(null);
   const [accordionItems, setAccordionItems] = useState<AccordionChildType[]>([]);
 
-  useEffect(() => {
-    const updateLoanData = () => {
-      const loans = getLoans();
-      setLoanData({
-        title: "Existing Loans",
-        description: "Your current loans",
-        monetaryValues: loans,
-        onClick: handleOpenAddModal
-      });
-    };
-  
-    updateLoanData(); // Initial data load
-    const unsubscribe = subscribeToStore(updateLoanData);
-  
-    return () => unsubscribe(); // Cleanup subscription on unmount
+  const updateLoanData = useCallback(() => {
+    const loans = getLoans();
+    setLoanData({
+      title: "Existing Loans",
+      description: "Your current loans",
+      monetaryValues: loans,
+      onClick: handleOpenAddModal
+    });
   }, []);
+
+  useEffect(() => {
+    updateLoanData();
+    const unsubscribe = subscribeToStore(updateLoanData);
+    return () => unsubscribe();
+  }, [updateLoanData]);
 
   useEffect(() => {
     if (loanData) {
@@ -76,19 +75,27 @@ export const LoanAccordion: React.FC = () => {
     setCurrentLoan(null);
   };
 
-  const handleAddLoan = () => {
-    // Logic for adding a new loan
-    console.log('New loan added successfully');
-    handleCloseAddModal();
-    // Refresh loan data here
+  const handleAddLoan = async (newLoan: Loan) => {
+    try {
+      await addLoan(newLoan);
+      console.log('New loan added successfully');
+      handleCloseAddModal();
+      updateLoanData();
+    } catch (error) {
+      console.error('Error adding new loan:', error);
+    }
   };
 
-  const handleEditLoan = () => {
+  const handleEditLoan = async () => {
     if (currentLoan) {
-      // Logic for updating the current loan
-      console.log(`Loan ${currentLoan.id} updated successfully`);
-      handleCloseEditModal();
-      // Refresh loan data here
+      try {
+        await updateLoan(currentLoan);
+        console.log(`Loan ${currentLoan.id} updated successfully`);
+        handleCloseEditModal();
+        updateLoanData();
+      } catch (error) {
+        console.error(`Error updating loan ${currentLoan.id}:`, error);
+      }
     }
   };
 
@@ -96,7 +103,7 @@ export const LoanAccordion: React.FC = () => {
     try {
       await deleteLoan(id);
       console.log(`Loan ${id} deleted successfully`);
-      // Refresh the loans data here
+      updateLoanData();
     } catch (error) {
       console.error(`Error deleting loan ${id}:`, error);
     }
