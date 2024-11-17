@@ -6,6 +6,7 @@ import { MonetaryNode } from './MonetaryNode';
 import { addLoan, deleteLoan, getLoans, updateLoan } from '../services/loanService';
 import { Modal } from './Modal';
 import { subscribeToStore } from '../dataStore.ts/dataStore';
+import { LoanForm } from './LoanForm';
 
 export const LoanAccordion: React.FC = () => {
   const [loanData, setLoanData] = useState<LoanCardType | null>(null);
@@ -86,16 +87,14 @@ export const LoanAccordion: React.FC = () => {
     }
   };
 
-  const handleEditLoan = async () => {
-    if (currentLoan) {
-      try {
-        await updateLoan(currentLoan);
-        console.log(`Loan ${currentLoan.id} updated successfully`);
-        handleCloseEditModal();
-        updateLoanData();
-      } catch (error) {
-        console.error(`Error updating loan ${currentLoan.id}:`, error);
-      }
+  const handleEditLoan = async (updatedLoan: Loan) => {
+    try {
+      await updateLoan(updatedLoan);
+      console.log(`Loan ${updatedLoan.id} updated successfully`);
+      handleCloseEditModal();
+      updateLoanData();
+    } catch (error) {
+      console.error(`Error updating loan ${updatedLoan.id}:`, error);
     }
   };
 
@@ -123,18 +122,16 @@ export const LoanAccordion: React.FC = () => {
       <Modal
         isOpen={isAddModalOpen}
         onClose={handleCloseAddModal}
-        onSubmit={handleAddLoan}
         title="Add Loan"
       >
-        Add loan placeholder
+        <LoanForm onSubmit={handleAddLoan} />
       </Modal>
       <Modal
         isOpen={isEditModalOpen}
         onClose={handleCloseEditModal}
-        onSubmit={handleEditLoan}
         title="Edit Loan"
       >
-        Edit loan placeholder
+        <LoanForm loan={currentLoan || undefined} onSubmit={handleEditLoan} />
       </Modal>
     </>
   );

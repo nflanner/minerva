@@ -14,6 +14,7 @@ export const addLoan = async (loan: Loan): Promise<void> => {
 
 export const updateLoan = async (updatedLoan: Loan): Promise<void> => {
   const data = getStoreData();
+  console.log({ updatedLoan, data });
   const index = data.loans.findIndex(loan => loan.id === updatedLoan.id);
   if (index !== -1) {
     data.loans[index] = updatedLoan;

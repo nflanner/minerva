@@ -3,7 +3,7 @@ import React, { ReactNode } from 'react';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (...args: any[]) => void;
+  onSubmit?: (...args: any[]) => void;
   title: string;
   children: ReactNode;
 }
@@ -25,20 +25,22 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, 
         <div className="p-4">
           {children}
         </div>
-        <div className="flex justify-end p-4 border-t">
-          <button 
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 mr-2" 
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button 
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" 
-            onClick={onSubmit}
-          >
-            Submit
-          </button>
-        </div>
+        {!!onSubmit && (
+          <div className="flex justify-end p-4 border-t">
+            <button 
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 mr-2" 
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button 
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" 
+              onClick={onSubmit}
+            >
+              Submit
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -60,7 +60,7 @@ export const MonetaryInput: React.FC = () => {
         isOpen={isSaveModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSaveSubmit}
-        title="Save Data"
+        title="Export Data"
       >
         <input
           type="text"
