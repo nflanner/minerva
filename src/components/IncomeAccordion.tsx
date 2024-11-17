@@ -1,14 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Accordion, AccordionChildType } from './Accordion';
 import { MonetaryCard } from './MonetaryCard';
-import { IncomeCardType, FinancialItem } from '../schema/schema';
+import { IncomeCardType, FinancialItem, Income } from '../schema/schema';
 import { MonetaryNode } from './MonetaryNode';
-import { deleteIncome, getIncome } from '../services/incomeServices';
+import { addIncome, deleteIncome, getIncome, updateIncome } from '../services/incomeServices';
 import { getStoreData, subscribeToStore, updateStoreData } from '../dataStore.ts/dataStore';
+import { Modal } from './Modal';
+import { IncomeForm } from './IncomeForm';
 
 export const IncomeAccordion: React.FC = () => {
   const [incomeData, setIncomeData] = useState<IncomeCardType | null>(null);
   const [accordionItems, setAccordionItems] = useState<AccordionChildType[]>([]);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentIncome, setCurrentIncome] = useState<Income | null>(null);
 
   const updateIncomeData = useCallback(() => {
     const income = getIncome();
@@ -16,15 +21,14 @@ export const IncomeAccordion: React.FC = () => {
       title: "Monthly Income",
       description: "Your recurring monthly income",
       monetaryValues: income,
-      onClick: () => console.log("Adding new monthly income")
+      onClick: handleOpenAddModal
     });
   }, []);
 
   useEffect(() => {
-    updateIncomeData(); // Initial data load
+    updateIncomeData();
     const unsubscribe = subscribeToStore(updateIncomeData);
-
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, [updateIncomeData]);
 
   useEffect(() => {
@@ -40,7 +44,7 @@ export const IncomeAccordion: React.FC = () => {
                 <MonetaryNode
                   key={value.id}
                   item={value}
-                  onEdit={() => console.log(`Editing income ${value.id}`)}
+                  onEdit={() => handleOpenEditModal(value as Income)}
                   onClear={() => handleClear(value.id)}
                 />
               ))}
@@ -58,22 +62,49 @@ export const IncomeAccordion: React.FC = () => {
     try {
       await deleteIncome(id);
       console.log(`Income ${id} deleted successfully`);
-      
-      // Update the local state and the data store
-      const updatedIncomeData = {
-        ...incomeData!,
-        monetaryValues: incomeData!.monetaryValues.filter((item: FinancialItem) => item.id !== id)
-      };
-      setIncomeData(updatedIncomeData);
-      
-      // Update the data store
-      const storeData = getStoreData();
-      updateStoreData({
-        ...storeData,
-        monthlyIncome: updatedIncomeData.monetaryValues
-      });
+      updateIncomeData();
     } catch (error) {
       console.error(`Error deleting income ${id}:`, error);
+    }
+  };
+
+  const handleOpenAddModal = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+  };
+
+  const handleOpenEditModal = (income: Income) => {
+    setCurrentIncome(income);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setCurrentIncome(null);
+  };
+
+  const handleAddIncome = async (newIncome: Income) => {
+    try {
+      await addIncome(newIncome);
+      console.log('New income added successfully');
+      handleCloseAddModal();
+      updateIncomeData();
+    } catch (error) {
+      console.error('Error adding new income:', error);
+    }
+  };
+
+  const handleEditIncome = async (updatedIncome: Income) => {
+    try {
+      await updateIncome(updatedIncome);
+      console.log(`Income ${updatedIncome.id} updated successfully`);
+      handleCloseEditModal();
+      updateIncomeData();
+    } catch (error) {
+      console.error(`Error updating income ${updatedIncome.id}:`, error);
     }
   };
 
@@ -85,5 +116,23 @@ export const IncomeAccordion: React.FC = () => {
     );
   };
 
-  return <Accordion items={accordionItems} />;
+  return (
+    <>
+      <Accordion items={accordionItems} />
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={handleCloseAddModal}
+        title="Add Income"
+      >
+        <IncomeForm onSubmit={handleAddIncome} />
+      </Modal>
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        title="Edit Income"
+      >
+        <IncomeForm income={currentIncome || undefined} onSubmit={handleEditIncome} />
+      </Modal>
+    </>
+  );
 };

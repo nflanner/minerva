@@ -1,14 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Accordion, AccordionChildType } from './Accordion';
 import { MonetaryCard } from './MonetaryCard';
-import { ExpenseCardType, FinancialItem } from '../schema/schema';
+import { ExpenseCardType, FinancialItem, Expense } from '../schema/schema';
 import { MonetaryNode } from './MonetaryNode';
-import { deleteExpense, getExpenses } from '../services/expenseService';
+import { addExpense, deleteExpense, getExpenses, updateExpense } from '../services/expenseService';
 import { getStoreData, subscribeToStore, updateStoreData } from '../dataStore.ts/dataStore';
+import { Modal } from './Modal';
+import { ExpenseForm } from './ExpenseForm';
 
 export const ExpenseAccordion: React.FC = () => {
   const [expenseData, setExpenseData] = useState<ExpenseCardType | null>(null);
   const [accordionItems, setAccordionItems] = useState<AccordionChildType[]>([]);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentExpense, setCurrentExpense] = useState<Expense | null>(null);
 
   const updateExpenseData = useCallback(() => {
     const monthlyExpenses = getExpenses();
@@ -16,15 +21,14 @@ export const ExpenseAccordion: React.FC = () => {
       title: "Monthly Expenses",
       description: "Your recurring monthly expenses",
       monetaryValues: monthlyExpenses,
-      onClick: () => console.log("Adding new monthly expense")
+      onClick: handleOpenAddModal
     });
   }, []);
 
   useEffect(() => {
-    updateExpenseData(); // Initial data load
+    updateExpenseData();
     const unsubscribe = subscribeToStore(updateExpenseData);
-
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, [updateExpenseData]);
 
   useEffect(() => {
@@ -40,7 +44,7 @@ export const ExpenseAccordion: React.FC = () => {
                 <MonetaryNode
                   key={value.id}
                   item={value}
-                  onEdit={() => console.log(`Editing expense ${value.id}`)}
+                  onEdit={() => handleOpenEditModal(value as Expense)}
                   onClear={() => handleDelete(value.id)}
                 />
               ))}
@@ -58,22 +62,49 @@ export const ExpenseAccordion: React.FC = () => {
     try {
       await deleteExpense(id);
       console.log(`Expense ${id} deleted successfully`);
-      
-      // Update the local state and the data store
-      const updatedExpenseData = {
-        ...expenseData!,
-        monetaryValues: expenseData!.monetaryValues.filter((item: FinancialItem) => item.id !== id)
-      };
-      setExpenseData(updatedExpenseData);
-      
-      // Update the data store
-      const storeData = getStoreData();
-      updateStoreData({
-        ...storeData,
-        monthlyExpenses: updatedExpenseData.monetaryValues
-      });
+      updateExpenseData();
     } catch (error) {
       console.error(`Error deleting expense ${id}:`, error);
+    }
+  };
+
+  const handleOpenAddModal = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+  };
+
+  const handleOpenEditModal = (expense: Expense) => {
+    setCurrentExpense(expense);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setCurrentExpense(null);
+  };
+
+  const handleAddExpense = async (newExpense: Expense) => {
+    try {
+      await addExpense(newExpense);
+      console.log('New expense added successfully');
+      handleCloseAddModal();
+      updateExpenseData();
+    } catch (error) {
+      console.error('Error adding new expense:', error);
+    }
+  };
+
+  const handleEditExpense = async (updatedExpense: Expense) => {
+    try {
+      await updateExpense(updatedExpense);
+      console.log(`Expense ${updatedExpense.id} updated successfully`);
+      handleCloseEditModal();
+      updateExpenseData();
+    } catch (error) {
+      console.error(`Error updating expense ${updatedExpense.id}:`, error);
     }
   };
 
@@ -85,5 +116,23 @@ export const ExpenseAccordion: React.FC = () => {
     );
   };
 
-  return <Accordion items={accordionItems} />;
+  return (
+    <>
+      <Accordion items={accordionItems} />
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={handleCloseAddModal}
+        title="Add Expense"
+      >
+        <ExpenseForm onSubmit={handleAddExpense} />
+      </Modal>
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        title="Edit Expense"
+      >
+        <ExpenseForm expense={currentExpense || undefined} onSubmit={handleEditExpense} />
+      </Modal>
+    </>
+  );
 };
