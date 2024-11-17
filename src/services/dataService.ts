@@ -14,16 +14,23 @@ export const readData = (): LocalData => {
 };
 
 export const writeData = async (data: LocalData, filename: string): Promise<void> => {
-  const localDataPath = path.join(process.cwd(), 'local-data');
-  const filePath = path.join(localDataPath, filename);
-
   try {
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2));
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
     updateStoreData(data);
-    console.log(`Data successfully written to ${filePath}`);
+    console.log(`Data successfully prepared for download as ${filename}`);
   } catch (error) {
-    console.error('Error writing data:', error);
-    throw new Error('Failed to write data to file');
+    console.error('Error preparing data for download:', error);
+    throw new Error('Failed to prepare data for download');
   }
 };
 
