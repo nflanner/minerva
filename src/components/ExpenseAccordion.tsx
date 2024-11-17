@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Accordion, AccordionChildType } from './Accordion';
 import { MonetaryCard } from './MonetaryCard';
-import { ExpenseCardType, FinancialItem, Expense } from '../schema/schema';
+import { ExpenseCardType, Expense } from '../schema/schema';
 import { MonetaryNode } from './MonetaryNode';
 import { addExpense, deleteExpense, getExpenses, updateExpense } from '../services/expenseService';
-import { getStoreData, subscribeToStore, updateStoreData } from '../dataStore.ts/dataStore';
+import { subscribeToStore } from '../dataStore.ts/dataStore';
 import { Modal } from './Modal';
 import { ExpenseForm } from './ExpenseForm';
 

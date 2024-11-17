@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { Button } from './Button';
 
 interface MonetaryCardProps {
   title: ReactNode;
@@ -24,12 +25,12 @@ export const MonetaryCard: React.FC<MonetaryCardProps> = ({
           </div>
         ))}
       </div>
-      <button
+      <Button
         onClick={onClick}
-        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
+        color="blue"
       >
         Add
-      </button>
+      </Button>
     </div>
   );
 };

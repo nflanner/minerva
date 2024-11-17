@@ -1,4 +1,5 @@
 import { ContentLayout, MonetaryInput } from './components';
+import { ScriptSection } from './components/ScriptSection';
 import './App.css';
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
         <p>This is some intro paragraph</p>
       </div>
       <MonetaryInput />
+      <ScriptSection />
     </ContentLayout>
   );
 }

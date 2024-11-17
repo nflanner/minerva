@@ -6,6 +6,7 @@ import { IncomeAccordion } from './IncomeAccordion';
 import { Modal } from './Modal';
 import { writeData } from '../services/dataService';
 import { getStoreData } from '../dataStore.ts/dataStore';
+import { Button } from './Button';
 
 export const MonetaryInput: React.FC = () => {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -50,12 +51,12 @@ export const MonetaryInput: React.FC = () => {
       <LoanAccordion />
       <ExpenseAccordion />
       <IncomeAccordion />
-      <button
+      <Button
         onClick={handleSaveClick}
-        className="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out"
+        color="grey"
       >
         Export Data
-      </button>
+      </Button>
       <Modal
         isOpen={isSaveModalOpen}
         onClose={handleCloseModal}

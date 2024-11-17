@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Expense, Cadence } from '../schema/schema';
 import { FormInput } from './FormInput';
 import { FormSelect } from './FormSelect';
+import { Button } from './Button';
 
 interface ExpenseFormProps {
   expense?: Expense;
@@ -64,9 +65,9 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSubmit }) =
           placeholder="e.g., 10, 25"
         />
       )}
-      <button type="submit" className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+      <Button type="submit" color="blue" fullWidth>
         Submit
-      </button>
+      </Button>
     </form>
   );
 };

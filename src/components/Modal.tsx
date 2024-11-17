@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { Button } from './Button';
 
 interface ModalProps {
   isOpen: boolean;
@@ -27,18 +28,18 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, 
         </div>
         {!!onSubmit && (
           <div className="flex justify-end p-4 border-t">
-            <button 
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 mr-2" 
+            <Button 
+              color="white"
               onClick={onClose}
             >
               Cancel
-            </button>
-            <button 
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" 
+            </Button>
+            <Button 
+              color="blue"
               onClick={onSubmit}
             >
               Submit
-            </button>
+            </Button>
           </div>
         )}
       </div>
