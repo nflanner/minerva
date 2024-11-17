@@ -18,47 +18,54 @@ export function generateGuid(): string {
 }
 
 export const getLoanData = (): LoanCardType => {
-  const loans: Loan[] = localData.loans.map(loan => ({
-    id: generateGuid(),
-    ...loan,
-    cadence: Cadence[loan.cadence as keyof typeof Cadence]
-  }));
-
   return {
     title: "Existing Loans",
     description: "Your current loans",
-    monetaryValues: loans,
+    monetaryValues: [],
     onClick: () => console.log("Adding new loan"),
   };
 };
 
 export const getExpenseData = (): ExpenseCardType => {
-  const expenses: Expense[] = localData.monthlyExpenses.map(expense => ({
-    id: generateGuid(),
-    ...expense,
-    cadence: Cadence[expense.cadence as keyof typeof Cadence]
-  }));
-
   return {
     title: "Monthly Expenses",
     description: "Recurring monthly costs",
-    monetaryValues: expenses,
+    monetaryValues: [],
     onClick: () => console.log("Adding new monthly expense"),
   };
 };
 
 export const getIncomeData = (): IncomeCardType => {
-  const incomes: Income[] = localData.monthlyIncome.map(income => ({
-    id: generateGuid(),
-    ...income,
-    cadence: Cadence[income.cadence as keyof typeof Cadence]
-  }));
-
   return {
     title: "Monthly Income",
     description: "Recurring monthly income",
-    monetaryValues: incomes,
+    monetaryValues: [],
     onClick: () => console.log("Adding new monthly income"),
   };
+};
+
+export const validateJsonStructure = (json: any): boolean => {
+  return (
+    json &&
+    Array.isArray(json.loans) &&
+    Array.isArray(json.monthlyExpenses) &&
+    Array.isArray(json.monthlyIncome) &&
+    json.loans.every((loan: any) => 
+      typeof loan.name === 'string' &&
+      typeof loan.amount === 'number' &&
+      typeof loan.interestRate === 'number' &&
+      typeof loan.cadence === 'string'
+    ) &&
+    json.monthlyExpenses.every((expense: any) =>
+      typeof expense.name === 'string' &&
+      typeof expense.amount === 'number' &&
+      typeof expense.cadence === 'string'
+    ) &&
+    json.monthlyIncome.every((income: any) =>
+      typeof income.name === 'string' &&
+      typeof income.amount === 'number' &&
+      typeof income.cadence === 'string'
+    )
+  );
 };
 

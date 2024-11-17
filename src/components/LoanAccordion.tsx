@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Accordion, AccordionChildType } from './Accordion';
 import { MonetaryCard } from './MonetaryCard';
 import { LoanCardType, Loan } from '../schema/schema';
@@ -49,28 +49,32 @@ export const LoanAccordion: React.FC<LoanAccordionProps> = ({ loanData }) => {
     }
   };
 
-  const [accordionItems, setAccordionItems] = useState<AccordionChildType[]>([
-    {
-      title: loanData.title,
-      content: (
-        <MonetaryCard
-          title={loanData.title}
-          description={loanData.description}
-          monetaryValues={loanData.monetaryValues.map(loan => (
-            <MonetaryNode
-              key={loan.id}
-              item={loan}
-              onEdit={() => handleOpenEditModal(loan)}
-              onClear={(id) => handleClear(id)}
-            />
-          ))}
-          onClick={handleOpenAddModal}
-        />
-      ),
-      isOpen: true,
-      onClick: () => toggleAccordion(0)
-    }
-  ]);
+  const [accordionItems, setAccordionItems] = useState<AccordionChildType[]>([]);
+
+  useEffect(() => {
+    setAccordionItems([
+      {
+        title: loanData.title,
+        content: (
+          <MonetaryCard
+            title={loanData.title}
+            description={loanData.description}
+            monetaryValues={loanData.monetaryValues.map(loan => (
+              <MonetaryNode
+                key={loan.id}
+                item={loan}
+                onEdit={() => handleOpenEditModal(loan)}
+                onClear={(id) => handleClear(id)}
+              />
+            ))}
+            onClick={handleOpenAddModal}
+          />
+        ),
+        isOpen: true,
+        onClick: () => toggleAccordion(0)
+      }
+    ]);
+  }, [loanData]);
 
   const handleClear = async (id: string) => {
     try {

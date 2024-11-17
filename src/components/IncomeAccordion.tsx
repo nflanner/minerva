@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Accordion, AccordionChildType } from './Accordion';
 import { MonetaryCard } from './MonetaryCard';
 import { IncomeCardType } from '../schema/schema';
@@ -10,28 +10,32 @@ interface IncomeAccordionProps {
 }
 
 export const IncomeAccordion: React.FC<IncomeAccordionProps> = ({ incomeData }) => {
-  const [accordionItems, setAccordionItems] = useState<AccordionChildType[]>([
-    {
-      title: incomeData.title,
-      content: (
-        <MonetaryCard
-          title={incomeData.title}
-          description={incomeData.description}
-          monetaryValues={incomeData.monetaryValues.map(value => (
-            <MonetaryNode
-              key={value.id}
-              item={value}
-              onEdit={() => console.log(`Editing income ${value.id}`)}
-              onClear={() => handleClear(value.id)}
-            />
-          ))}
-          onClick={incomeData.onClick}
-        />
-      ),
-      isOpen: true,
-      onClick: () => toggleAccordion(0)
-    }
-  ]);
+  const [accordionItems, setAccordionItems] = useState<AccordionChildType[]>([]);
+
+  useEffect(() => {
+    setAccordionItems([
+      {
+        title: incomeData.title,
+        content: (
+          <MonetaryCard
+            title={incomeData.title}
+            description={incomeData.description}
+            monetaryValues={incomeData.monetaryValues.map(value => (
+              <MonetaryNode
+                key={value.id}
+                item={value}
+                onEdit={() => console.log(`Editing income ${value.id}`)}
+                onClear={() => handleClear(value.id)}
+              />
+            ))}
+            onClick={incomeData.onClick}
+          />
+        ),
+        isOpen: true,
+        onClick: () => toggleAccordion(0)
+      }
+    ]);
+  }, [incomeData]);
 
   const handleClear = async (id: string) => {
     try {
