@@ -35,9 +35,16 @@ export interface LoanCardType {
   onClick: () => void;
 }
 
-export interface OtherMonetaryCardType {
+export interface ExpenseCardType {
   title: string;
   description: string;
-  monetaryValues: (Expense | Income)[];
+  monetaryValues: Expense[];
+  onClick: () => void;
+}
+
+export interface IncomeCardType {
+  title: string;
+  description: string;
+  monetaryValues: Income[];
   onClick: () => void;
 }

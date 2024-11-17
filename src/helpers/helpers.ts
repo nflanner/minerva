@@ -1,4 +1,13 @@
-import { Loan, Cadence, FinancialItem, LoanCardType, OtherMonetaryCardType } from "../schema/schema";
+import {
+  Loan,
+  Cadence,
+  LoanCardType,
+  ExpenseCardType,
+  IncomeCardType,
+  Expense,
+  Income
+} from "../schema/schema";
+import localData from '../../local-data/local-data.json';
 
 export function generateGuid(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -8,43 +17,48 @@ export function generateGuid(): string {
   });
 }
 
-export const getLoanList = (): LoanCardType[] => {
-  const loans: Loan[] = [
-    { id: generateGuid(), name: "Loan 1", amount: 200000, interestRate: 0.035, cadence: Cadence.Monthly },
-    { id: generateGuid(), name: "Loan 2", amount: 15000, interestRate: 0.045, cadence: Cadence.Biweekly },
-  ];
+export const getLoanData = (): LoanCardType => {
+  const loans: Loan[] = localData.loans.map(loan => ({
+    id: generateGuid(),
+    ...loan,
+    cadence: Cadence[loan.cadence as keyof typeof Cadence]
+  }));
 
-  return [
-    {
-      title: "Existing Loans",
-      description: "Your current loans",
-      monetaryValues: loans,
-      onClick: () => console.log("Adding new loan"),
-    },
-  ];
+  return {
+    title: "Existing Loans",
+    description: "Your current loans",
+    monetaryValues: loans,
+    onClick: () => console.log("Adding new loan"),
+  };
 };
 
-export const getOtherMonetaryList = (): OtherMonetaryCardType[] => {
-  return [
-    {
-      title: "Monthly Expenses",
-      description: "Recurring monthly costs",
-      monetaryValues: [
-        { id: generateGuid(), name: "Expense 1", amount: 1000, cadence: Cadence.Monthly },
-        { id: generateGuid(), name: "Expense 2", amount: 200, cadence: Cadence.Monthly },
-        { id: generateGuid(), name: "Expense 3", amount: 400, cadence: Cadence.Monthly },
-      ],
-      onClick: () => console.log("Adding new monthly expense"),
-    },
-    {
-      title: "Monthly Income",
-      description: "Reccuring monthly income",
-      monetaryValues: [
-        { id: generateGuid(), name: "Income 1", amount: 5000, cadence: Cadence.Biweekly },
-        { id: generateGuid(), name: "Income 2", amount: 2000, cadence: Cadence.Monthly },
-        { id: generateGuid(), name: "Income 3", amount: 2000, cadence: Cadence.SpecificDates, specificDates: [10, 25] },
-      ],
-      onClick: () => console.log("Adding new monthly income"),
-    },
-  ];
+export const getExpenseData = (): ExpenseCardType => {
+  const expenses: Expense[] = localData.monthlyExpenses.map(expense => ({
+    id: generateGuid(),
+    ...expense,
+    cadence: Cadence[expense.cadence as keyof typeof Cadence]
+  }));
+
+  return {
+    title: "Monthly Expenses",
+    description: "Recurring monthly costs",
+    monetaryValues: expenses,
+    onClick: () => console.log("Adding new monthly expense"),
+  };
 };
+
+export const getIncomeData = (): IncomeCardType => {
+  const incomes: Income[] = localData.monthlyIncome.map(income => ({
+    id: generateGuid(),
+    ...income,
+    cadence: Cadence[income.cadence as keyof typeof Cadence]
+  }));
+
+  return {
+    title: "Monthly Income",
+    description: "Recurring monthly income",
+    monetaryValues: incomes,
+    onClick: () => console.log("Adding new monthly income"),
+  };
+};
+
