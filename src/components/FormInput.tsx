@@ -10,6 +10,9 @@ interface FormInputProps {
   title?: string;
   placeholder?: string;
   type?: string;
+  className?: string;
+  labelClassName?: string;
+  inputClassName?: string;
 }
 
 export const FormInput: React.FC<FormInputProps> = ({
@@ -21,11 +24,16 @@ export const FormInput: React.FC<FormInputProps> = ({
   pattern,
   title,
   placeholder,
-  type = 'text'
+  type = 'text',
+  className = '',
+  labelClassName = '',
+  inputClassName = ''
 }) => {
+  const defaultInputClasses = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500';
+
   return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700">{label}</label>
+    <div className={className}>
+      <label htmlFor={id} className={`block text-sm font-medium text-gray-700 ${labelClassName}`}>{label}</label>
       <input
         type={type}
         id={id}
@@ -35,7 +43,7 @@ export const FormInput: React.FC<FormInputProps> = ({
         pattern={pattern}
         title={title}
         placeholder={placeholder}
-        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        className={`${defaultInputClasses} ${inputClassName}`}
       />
     </div>
   );

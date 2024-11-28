@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Accordion, AccordionChildType } from './Accordion';
 import { MonetaryCard } from './MonetaryCard';
-import { IncomeCardType, FinancialItem, Income } from '../schema/schema';
+import { IncomeCardType, Income } from '../schema/schema';
 import { MonetaryNode } from './MonetaryNode';
 import { addIncome, deleteIncome, getIncome, updateIncome } from '../services/incomeServices';
-import { getStoreData, subscribeToStore, updateStoreData } from '../dataStore.ts/dataStore';
+import { subscribeToStore } from '../dataStore.ts/dataStore';
 import { Modal } from './Modal';
 import { IncomeForm } from './IncomeForm';
 
@@ -51,7 +51,7 @@ export const IncomeAccordion: React.FC = () => {
               onClick={incomeData.onClick}
             />
           ),
-          isOpen: true,
+          isOpen: false,
           onClick: () => toggleAccordion(0)
         }
       ]);

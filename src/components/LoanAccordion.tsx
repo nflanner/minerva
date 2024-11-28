@@ -51,7 +51,7 @@ export const LoanAccordion: React.FC = () => {
               onClick={handleOpenAddModal}
             />
           ),
-          isOpen: true,
+          isOpen: false,
           onClick: () => toggleAccordion(0)
         }
       ]);

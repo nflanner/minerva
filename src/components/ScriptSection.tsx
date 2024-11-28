@@ -5,14 +5,16 @@ import { ResultsAccordion } from "./ResultsAccordion";
 import { getStoreData, subscribeToStore } from "../dataStore.ts/dataStore";
 import { Income } from "../schema/schema";
 import { LocalData } from "../services/dataService";
+import { FormInput } from "./FormInput";
+import { monthDays } from "../helpers/records";
 
 export const ScriptSection: React.FC = () => {
   const [storeData, setStoreData] = useState<LocalData>(getStoreData());
   const [scriptResults, setScriptResults] = useState<any>(null);
-  const [currentSavings, setCurrentSavings] = useState<number | null>(null);
-  const [currentChecking, setCurrentChecking] = useState<number | null>(null);
-  const [desiredDepositAmount, setDesiredDepositAmount] = useState<number | null>(null);
-  const [desiredCheckingMin, setDesiredCheckingMin] = useState<number | null>(null);
+  const [currentSavings, setCurrentSavings] = useState<string | null>(null);
+  const [currentChecking, setCurrentChecking] = useState<string | null>(null);
+  const [desiredDepositAmount, setDesiredDepositAmount] = useState<string | null>(null);
+  const [desiredCheckingMin, setDesiredCheckingMin] = useState<string | null>(null);
   const [incomePayDates, setIncomePayDates] = useState<{[key: string]: {month: number, day: number}}>({});
   const [isFormValid, setIsFormValid] = useState(false);
 
@@ -47,97 +49,144 @@ export const ScriptSection: React.FC = () => {
       currentChecking !== null &&
       desiredDepositAmount !== null &&
       desiredCheckingMin !== null &&
-      desiredCheckingMin > 0 &&
+      parseFloat(desiredCheckingMin) > 0 &&
       Object.values(incomePayDates).every(date => date.month > 0 && date.day > 0);
 
     setIsFormValid(allFieldsFilled);
   }, [currentSavings, currentChecking, desiredDepositAmount, desiredCheckingMin, incomePayDates]);
 
-  const handleRunScript = () => {
+  const handleRunScript = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Prevent default form submission
     if (isFormValid) {
-      const results = runBudgetScript({
-        currentSavings: currentSavings!,
-        currentChecking: currentChecking!,
-        desiredDepositAmount: desiredDepositAmount!,
-        desiredCheckingMin: desiredCheckingMin!,
+      const scriptVars = {
+        currentSavings: parseFloat(currentSavings!),
+        currentChecking: parseFloat(currentChecking!),
+        desiredDepositAmount: parseFloat(desiredDepositAmount!),
+        desiredCheckingMin: parseFloat(desiredCheckingMin!),
         incomePayDates,
-      });
-      setScriptResults(results);
+      };
+      console.log(scriptVars);
+      // Uncomment the following lines when ready to run the actual script
+      // const results = runBudgetScript(scriptVars);
+      // setScriptResults(results);
     }
   };
 
-  const handleIncomePayDateChange = (incomeId: string, field: 'month' | 'day', value: number) => {
-    setIncomePayDates(prev => ({
-      ...prev,
-      [incomeId]: {
-        ...prev[incomeId],
-        [field]: value
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
+
+  const handleIncomePayDateChange = (incomeId: string, field: 'month' | 'day', value: string) => {
+    const numValue = value === '' ? 0 : parseInt(value);
+    const errorKey = `${incomeId}-${field}`;
+  
+    if (value === '') {
+      setIncomePayDates(prev => ({
+        ...prev,
+        [incomeId]: { ...prev[incomeId], [field]: 0 }
+      }));
+      setValidationErrors(prev => ({ ...prev, [errorKey]: '' }));
+    } else if (field === 'month') {
+      if (numValue >= 1 && numValue <= 12) {
+        setIncomePayDates(prev => ({
+          ...prev,
+          [incomeId]: { ...prev[incomeId], month: numValue }
+        }));
+        setValidationErrors(prev => ({ ...prev, [errorKey]: '' }));
+      } else {
+        setValidationErrors(prev => ({ ...prev, [errorKey]: 'Please enter a valid month (1-12)' }));
       }
-    }));
+    } else if (field === 'day') {
+      const month = incomePayDates[incomeId]?.month || 1;
+      if (numValue >= 1 && numValue <= monthDays[month]) {
+        setIncomePayDates(prev => ({
+          ...prev,
+          [incomeId]: { ...prev[incomeId], day: numValue }
+        }));
+        setValidationErrors(prev => ({ ...prev, [errorKey]: '' }));
+      } else {
+        setValidationErrors(prev => ({ ...prev, [errorKey]: `Please enter a valid day (1-${monthDays[month]})` }));
+      }
+    }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <input
-          type="number"
-          placeholder="Current Savings"
-          value={currentSavings || ''}
-          onChange={(e) => setCurrentSavings(parseFloat(e.target.value) || null)}
-          className="p-2 border rounded"
-        />
-        <input
-          type="number"
-          placeholder="Current Checking"
-          value={currentChecking || ''}
-          onChange={(e) => setCurrentChecking(parseFloat(e.target.value) || null)}
-          className="p-2 border rounded"
-        />
-         <input
-          type="number"
-          placeholder="Desired Deposit Amount"
-          value={desiredDepositAmount || ''}
-          onChange={(e) => setDesiredDepositAmount(parseFloat(e.target.value) || null)}
-          className="p-2 border rounded"
-        />
-        <input
-          type="number"
-          placeholder="Desired Checking Minimum"
-          value={desiredCheckingMin || ''}
-          onChange={(e) => setDesiredCheckingMin(parseFloat(e.target.value) || null)}
-          className="p-2 border rounded"
-        />
-      </div>
-      <div className="space-y-2">
-        <h3 className="font-bold">Next Pay Dates</h3>
-        {storeData.monthlyIncome.map((income: Income) => (
-          <div key={income.id} className="flex space-x-2">
-            <span>{income.name}:</span>
-            <input
-              type="number"
-              placeholder="Month"
-              min={1}
-              max={12}
-              value={incomePayDates[income.id]?.month || ''}
-              onChange={(e) => handleIncomePayDateChange(income.id, 'month', parseInt(e.target.value))}
-              className="w-16 p-1 border rounded"
-            />
-            <input
-              type="number"
-              placeholder="Day"
-              min={1}
-              max={31}
-              value={incomePayDates[income.id]?.day || ''}
-              onChange={(e) => handleIncomePayDateChange(income.id, 'day', parseInt(e.target.value))}
-              className="w-16 p-1 border rounded"
-            />
-          </div>
-        ))}
-      </div>
-      <Button onClick={handleRunScript} color="green" disabled={!isFormValid}>
+    <form onSubmit={handleRunScript} className="space-y-4">
+      <FormInput
+        label="Current Savings"
+        id="current-savings"
+        value={currentSavings || ''}
+        onChange={setCurrentSavings}
+        required
+        pattern="^\d*\.?\d+$"
+        title="Please enter a valid positive number"
+      />
+      <FormInput
+        label="Current Checking"
+        id="current-checking"
+        value={currentChecking || ''}
+        onChange={setCurrentChecking}
+        required
+        pattern="^\d*\.?\d+$"
+        title="Please enter a valid positive number"
+      />
+
+      <FormInput
+        label="Desired Deposit Amount"
+        id="desired-deposit-amount"
+        value={desiredDepositAmount || ''}
+        onChange={setDesiredDepositAmount}
+        required
+        pattern="^\d*\.?\d+$"
+        title="Please enter a valid positive number"
+      />
+
+      <FormInput
+        label="Desired Checking Minimum"
+        id="desired-checking-minimum"
+        value={desiredCheckingMin || ''}
+        onChange={setDesiredCheckingMin}
+        required
+        pattern="^\d*\.?\d+$"
+        title="Please enter a valid positive number"
+      />
+
+      {storeData.monthlyIncome.length > 0 && (
+        <>
+          <h3 className="font-bold">Next Pay Dates</h3>
+          {storeData.monthlyIncome.map((income: Income) => (
+            <div key={income.id}>
+              <div className="flex flex-row items-end space-x-4">
+                <span className="font-bold pb-3">{income.name}:</span>
+                <FormInput
+                  label="Month"
+                  id={`${income.id}-month`}
+                  value={incomePayDates[income.id]?.month.toString() || ''}
+                  onChange={(value) => handleIncomePayDateChange(income.id, 'month', value)}
+                  required
+                  className="w-[50px]"
+                />
+                <FormInput
+                  label="Day"
+                  id={`${income.id}-day`}
+                  value={incomePayDates[income.id]?.day.toString() || ''}
+                  onChange={(value) => handleIncomePayDateChange(income.id, 'day', value)}
+                  required
+                  className="w-[50px]"
+                />
+              </div>
+              {(validationErrors[`${income.id}-month`] || validationErrors[`${income.id}-day`]) && (
+                <span className="text-red-500 text-xs text-center">
+                  {validationErrors[`${income.id}-month`] || validationErrors[`${income.id}-day`]}
+                </span>
+              )}
+            </div>
+          ))}
+        </>
+      )}
+
+      <Button type="submit" color="green" disabled={!isFormValid} disabledTooltip="Please fill in all fields">
         Run Budget Script
       </Button>
       {scriptResults && <ResultsAccordion scriptResults={scriptResults} />}
-    </div>
+    </form>
   );
 };

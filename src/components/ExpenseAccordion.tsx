@@ -51,7 +51,7 @@ export const ExpenseAccordion: React.FC = () => {
               onClick={expenseData.onClick}
             />
           ),
-          isOpen: true,
+          isOpen: false,
           onClick: () => toggleAccordion(0)
         }
       ]);
