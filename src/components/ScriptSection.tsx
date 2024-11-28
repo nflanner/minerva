@@ -66,6 +66,8 @@ export const ScriptSection: React.FC = () => {
         incomePayDates,
       };
       console.log(scriptVars);
+      const scriptResults = runBudgetScript(scriptVars);
+      console.log(scriptResults);
       // Uncomment the following lines when ready to run the actual script
       // const results = runBudgetScript(scriptVars);
       // setScriptResults(results);
