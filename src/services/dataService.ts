@@ -1,12 +1,13 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { Loan, FinancialItem } from '../schema/schema';
+import { Loan, Expense, Income, BudgetParameters } from '../schema/schema';
 import { getStoreData, updateStoreData } from '../dataStore.ts/dataStore';
 
 export interface LocalData {
   loans: Loan[];
-  monthlyExpenses: FinancialItem[];
-  monthlyIncome: FinancialItem[];
+  monthlyExpenses: Expense[];
+  monthlyIncome: Income[];
+  budgetParameters?: BudgetParameters;
 }
 
 export const readData = (): LocalData => {

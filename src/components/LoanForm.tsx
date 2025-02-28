@@ -11,7 +11,8 @@ interface LoanFormProps {
 
 export const LoanForm: React.FC<LoanFormProps> = ({ loan, onSubmit }) => {
   const [name, setName] = useState(loan?.name || '');
-  const [amount, setAmount] = useState(loan?.amount.toString() || '');
+  const [amount, setAmount] = useState(loan?.cadenceAmount.toString() || '');
+  const [amountRemaining, setAmountRemaining] = useState(loan?.amountRemaining.toString() || '');
   const [interestRate, setInterestRate] = useState(loan?.interestRate ? (loan.interestRate * 100).toString() : '');
   const [cadence, setCadence] = useState(loan?.cadence || Cadence.Monthly);
   const [specificDates, setSpecificDates] = useState(loan?.specificDates?.join(', ') || '');
@@ -21,12 +22,12 @@ export const LoanForm: React.FC<LoanFormProps> = ({ loan, onSubmit }) => {
     const newLoan: Loan = {
       id: loan?.id || '',
       name,
-      amount: parseFloat(amount),
+      cadenceAmount: parseFloat(amount),
+      amountRemaining: parseFloat(amountRemaining),
       interestRate: parseFloat(interestRate) / 100,
       cadence,
       specificDates: cadence === Cadence.SpecificDates ? specificDates.split(',').map(Number) : undefined
     };
-    console.log({ newLoan });
     onSubmit(newLoan);
   };
 
@@ -41,14 +42,29 @@ export const LoanForm: React.FC<LoanFormProps> = ({ loan, onSubmit }) => {
         onChange={setName}
         required
       />
+      <FormSelect
+        label="Cadence"
+        id="cadence"
+        value={cadence}
+        onChange={(value) => setCadence(value as Cadence)}
+        options={cadenceOptions}
+        required
+      />
       <FormInput
-        label="Amount"
+        label="Amount due per cadence"
         id="amount"
         value={amount}
         onChange={setAmount}
         required
         pattern="^\d*\.?\d+$"
         title="Please enter a valid positive number"
+      />
+      <FormInput
+        label="Remaining Balance"
+        id="amountRemaining"
+        value={amountRemaining.toString()}
+        onChange={setAmountRemaining}
+        required
       />
       <FormInput
         label="Interest Rate (%)"
@@ -58,14 +74,6 @@ export const LoanForm: React.FC<LoanFormProps> = ({ loan, onSubmit }) => {
         required
         pattern="^(0|[1-9]\d?)(\.\d{1,2})?$|^100(\.0{1,2})?$"
         title="Please enter a number between 0 and 100 with up to 2 decimal places"
-      />
-      <FormSelect
-        label="Cadence"
-        id="cadence"
-        value={cadence}
-        onChange={(value) => setCadence(value as Cadence)}
-        options={cadenceOptions}
-        required
       />
       {cadence === Cadence.SpecificDates && (
         <FormInput

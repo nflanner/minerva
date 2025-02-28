@@ -4,12 +4,14 @@ import { LocalData } from "../services/dataService";
 let currentData: LocalData = {
   loans: [],
   monthlyExpenses: [],
-  monthlyIncome: []
+  monthlyIncome: [],
+  budgetParameters: undefined
 };
 
-let listeners: (() => void)[] = [];
 
-export const subscribeToStore = (listener: () => void) => {
+let listeners: ((data: LocalData) => void)[] = [];
+
+export const subscribeToStore = (listener: (data: LocalData) => void) => {
   listeners.push(listener);
   return () => {
     listeners = listeners.filter(l => l !== listener);
@@ -26,11 +28,12 @@ export const updateStoreData = (data: LocalData): void => {
     ...data,
     loans: data.loans.map(ensureGuid),
     monthlyExpenses: data.monthlyExpenses.map(ensureGuid),
-    monthlyIncome: data.monthlyIncome.map(ensureGuid)
+    monthlyIncome: data.monthlyIncome.map(ensureGuid),
+    budgetParameters: data.budgetParameters
   };
 
   currentData = updatedData;
-  listeners.forEach(listener => listener());
+  listeners.forEach(listener => listener(currentData));
 };
 
 export const getStoreData = (): LocalData => {

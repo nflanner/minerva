@@ -10,14 +10,15 @@ export enum Cadence {
 
 export interface FinancialItem {
   id: string;
-  name: string
-  amount: number;
+  name: string;
+  cadenceAmount: number;
   cadence: Cadence;
   specificDates?: number[];
 }
 
 export interface Loan extends FinancialItem {
   interestRate: number;
+  amountRemaining: number;
 }
 
 export interface Expense extends FinancialItem {
@@ -47,4 +48,12 @@ export interface IncomeCardType {
   description: string;
   monetaryValues: Income[];
   onClick: () => void;
+}
+
+export interface BudgetParameters {
+  currentSavings: number;
+  currentChecking: number;
+  desiredDepositAmount: number;
+  desiredCheckingMin: number;
+  incomePayDates: {[key: string]: {month: number, day: number}};
 }

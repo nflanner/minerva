@@ -11,7 +11,7 @@ interface IncomeFormProps {
 
 export const IncomeForm: React.FC<IncomeFormProps> = ({ income, onSubmit }) => {
   const [name, setName] = useState(income?.name || '');
-  const [amount, setAmount] = useState(income?.amount.toString() || '');
+  const [amount, setAmount] = useState(income?.cadenceAmount.toString() || '');
   const [cadence, setCadence] = useState(income?.cadence || Cadence.Monthly);
   const [specificDates, setSpecificDates] = useState(income?.specificDates?.join(', ') || '');
 
@@ -20,7 +20,7 @@ export const IncomeForm: React.FC<IncomeFormProps> = ({ income, onSubmit }) => {
     const newIncome: Income = {
       id: income?.id || '',
       name,
-      amount: parseFloat(amount),
+      cadenceAmount: parseFloat(amount),
       cadence,
       specificDates: cadence === Cadence.SpecificDates ? specificDates.split(',').map(Number) : undefined
     };

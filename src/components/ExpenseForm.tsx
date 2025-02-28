@@ -11,7 +11,7 @@ interface ExpenseFormProps {
 
 export const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSubmit }) => {
   const [name, setName] = useState(expense?.name || '');
-  const [amount, setAmount] = useState(expense?.amount.toString() || '');
+  const [amount, setAmount] = useState(expense?.cadenceAmount.toString() || '');
   const [cadence, setCadence] = useState(expense?.cadence || Cadence.Monthly);
   const [specificDates, setSpecificDates] = useState(expense?.specificDates?.join(', ') || '');
 
@@ -20,11 +20,10 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSubmit }) =
     const newExpense: Expense = {
       id: expense?.id || '',
       name,
-      amount: parseFloat(amount),
+      cadenceAmount: parseFloat(amount),
       cadence,
       specificDates: cadence === Cadence.SpecificDates ? specificDates.split(',').map(Number) : undefined
     };
-    console.log({ newExpense });
     onSubmit(newExpense);
   };
 

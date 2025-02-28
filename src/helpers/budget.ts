@@ -28,7 +28,7 @@ export function runBudgetScript(inputs: ScriptInputs) {
     for (let i = 0; i < daysInYear; i++) {
       const currentDate = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
       if (currentDate.getDate() === dayOfMonth) {
-        billsArray[i] += item.amount;
+        billsArray[i] += item.cadenceAmount;
       }
     }
   });
@@ -41,7 +41,7 @@ export function runBudgetScript(inputs: ScriptInputs) {
     for (let i = 0; i < daysInYear; i++) {
       const currentDate = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
       if (currentDate.getTime() === nextPayDate.getTime()) {
-        incomeArray[i] += income.amount;
+        incomeArray[i] += income.cadenceAmount;
         
         // Calculate next pay date based on cadence
         switch (income.cadence) {

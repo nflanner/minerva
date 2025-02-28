@@ -10,6 +10,7 @@ interface OtherMonetaryNodeProps {
 
 export const MonetaryNode: React.FC<OtherMonetaryNodeProps> = ({ item, onEdit, onClear }) => {
   const hasInterestRate = 'interestRate' in item
+  const hasAmountRemaining = 'amountRemaining' in item
   return (
     <EditDeleteNode
       onEdit={() => onEdit(item.id)}
@@ -17,9 +18,10 @@ export const MonetaryNode: React.FC<OtherMonetaryNodeProps> = ({ item, onEdit, o
     >
       <div className="flex justify-start w-full gap-2">
         <span className="font-bold">{item.name} |</span>
-        <span>Amount: ${item.amount.toFixed(2)},</span>
+        <span>Amount: ${item.cadenceAmount.toFixed(2)},</span>
         <span>Cadence: {item.cadence}{item.cadence === Cadence.SpecificDates ? ` (${item.specificDates?.join(', ')})` : ""}{hasInterestRate ? "," : ""}</span>
         {hasInterestRate && <span>Interest: {(item.interestRate * 100).toFixed(2)}%</span>}
+        {hasAmountRemaining && <span>Total Remaining: ${item.amountRemaining.toFixed(2)}</span>}
       </div>
     </EditDeleteNode>
   );

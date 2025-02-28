@@ -3,10 +3,11 @@ import { runBudgetScript } from "../helpers/budget";
 import { Button } from "./Button";
 import { ResultsAccordion } from "./ResultsAccordion";
 import { getStoreData, subscribeToStore } from "../dataStore.ts/dataStore";
-import { Income } from "../schema/schema";
+import { Cadence, Income } from "../schema/schema";
 import { LocalData } from "../services/dataService";
 import { FormInput } from "./FormInput";
-import { monthDays } from "../helpers/records";
+import { FormSelect } from "./FormSelect";
+import { Month, monthConfig, monthOptions, getDayOptions } from "../helpers/helpers";
 
 export const ScriptSection: React.FC = () => {
   const [storeData, setStoreData] = useState<LocalData>(getStoreData());
@@ -17,6 +18,7 @@ export const ScriptSection: React.FC = () => {
   const [desiredCheckingMin, setDesiredCheckingMin] = useState<string | null>(null);
   const [incomePayDates, setIncomePayDates] = useState<{[key: string]: {month: number, day: number}}>({});
   const [isFormValid, setIsFormValid] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
 
   const updateStoreData = useCallback(() => {
     const newStoreData = getStoreData();
@@ -56,7 +58,7 @@ export const ScriptSection: React.FC = () => {
   }, [currentSavings, currentChecking, desiredDepositAmount, desiredCheckingMin, incomePayDates]);
 
   const handleRunScript = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Prevent default form submission
+    event.preventDefault();
     if (isFormValid) {
       const scriptVars = {
         currentSavings: parseFloat(currentSavings!),
@@ -65,16 +67,10 @@ export const ScriptSection: React.FC = () => {
         desiredCheckingMin: parseFloat(desiredCheckingMin!),
         incomePayDates,
       };
-      console.log(scriptVars);
-      const scriptResults = runBudgetScript(scriptVars);
-      console.log(scriptResults);
-      // Uncomment the following lines when ready to run the actual script
-      // const results = runBudgetScript(scriptVars);
-      // setScriptResults(results);
+      const results = runBudgetScript(scriptVars);
+      setScriptResults(results);
     }
   };
-
-  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
 
   const handleIncomePayDateChange = (incomeId: string, field: 'month' | 'day', value: string) => {
     const numValue = value === '' ? 0 : parseInt(value);
@@ -87,27 +83,63 @@ export const ScriptSection: React.FC = () => {
       }));
       setValidationErrors(prev => ({ ...prev, [errorKey]: '' }));
     } else if (field === 'month') {
-      if (numValue >= 1 && numValue <= 12) {
+      if (numValue >= Month.January && numValue <= Month.December) {
         setIncomePayDates(prev => ({
           ...prev,
           [incomeId]: { ...prev[incomeId], month: numValue }
         }));
         setValidationErrors(prev => ({ ...prev, [errorKey]: '' }));
       } else {
-        setValidationErrors(prev => ({ ...prev, [errorKey]: 'Please enter a valid month (1-12)' }));
+        setValidationErrors(prev => ({ ...prev, [errorKey]: 'Please select a valid month' }));
       }
     } else if (field === 'day') {
-      const month = incomePayDates[incomeId]?.month || 1;
-      if (numValue >= 1 && numValue <= monthDays[month]) {
+      const month = incomePayDates[incomeId]?.month || Month.January;
+      const maxDays = monthConfig[month as Month].days;
+      
+      if (numValue >= 1 && numValue <= maxDays) {
         setIncomePayDates(prev => ({
           ...prev,
           [incomeId]: { ...prev[incomeId], day: numValue }
         }));
         setValidationErrors(prev => ({ ...prev, [errorKey]: '' }));
       } else {
-        setValidationErrors(prev => ({ ...prev, [errorKey]: `Please enter a valid day (1-${monthDays[month]})` }));
+        setValidationErrors(prev => ({ 
+          ...prev, 
+          [errorKey]: `Please select a valid day (1-${maxDays})` 
+        }));
       }
     }
+  };
+
+  // Add these helper functions at the top of the file
+  const getCurrentMonthOptions = () => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    // Only show current month and next 2 months
+    return monthOptions.filter(option => {
+      const monthNum = parseInt(option.value);
+      return monthNum >= currentMonth && monthNum <= currentMonth + 2;
+    });
+  };
+
+  const getValidDayOptions = (month: number, income: Income) => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentDay = currentDate.getDate();
+    
+    const days = getDayOptions(month);
+    
+    // If selected month is current month, only show future dates
+    if (month === currentMonth) {
+      return days.filter(day => parseInt(day.value) > currentDay);
+    }
+    
+    // For monthly income, only show valid pay dates
+    if (income.cadence === Cadence.Monthly && income.specificDates?.length) {
+      return days.filter(day => income.specificDates?.includes(parseInt(day.value)));
+    }
+    
+    return days;
   };
 
   return (
@@ -157,22 +189,27 @@ export const ScriptSection: React.FC = () => {
           {storeData.monthlyIncome.map((income: Income) => (
             <div key={income.id}>
               <div className="flex flex-row items-end space-x-4">
-                <span className="font-bold pb-3">{income.name}:</span>
-                <FormInput
+                <div className="flex flex-col">
+                  <span className="font-bold">{income.name}</span>
+                  <span className="text-xs text-gray-500">({income.cadence})</span>
+                </div>
+                <FormSelect
                   label="Month"
                   id={`${income.id}-month`}
-                  value={incomePayDates[income.id]?.month.toString() || ''}
+                  value={incomePayDates[income.id]?.month.toString()}
                   onChange={(value) => handleIncomePayDateChange(income.id, 'month', value)}
+                  options={getCurrentMonthOptions()}
                   required
-                  className="w-[50px]"
+                  className="w-[200px]"
                 />
-                <FormInput
+                <FormSelect
                   label="Day"
                   id={`${income.id}-day`}
-                  value={incomePayDates[income.id]?.day.toString() || ''}
+                  value={incomePayDates[income.id]?.day.toString()}
                   onChange={(value) => handleIncomePayDateChange(income.id, 'day', value)}
+                  options={getValidDayOptions(incomePayDates[income.id]?.month || 1, income)}
                   required
-                  className="w-[50px]"
+                  className="w-[100px]"
                 />
               </div>
               {(validationErrors[`${income.id}-month`] || validationErrors[`${income.id}-day`]) && (

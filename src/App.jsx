@@ -1,17 +1,23 @@
-import { ContentLayout, MonetaryInput } from './components';
-import { ScriptSection } from './components/ScriptSection';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ContentLayout } from './components';
+import { HomePage, IncomePage, ExpensePage, LoanPage, BudgetParametersPage, ReviewPage, ScriptPage } from './pages';
 import './App.css';
 
 function App() {
   return (
-    <ContentLayout>
-      <div className="p-4">
-        <h1 className="text-2xl font-bold">Welcome to Some Page</h1>
-        <p>This is some intro paragraph</p>
-      </div>
-      <MonetaryInput />
-      <ScriptSection />
-    </ContentLayout>
+    <BrowserRouter>
+      <ContentLayout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/income" element={<IncomePage />} />
+          <Route path="/expenses" element={<ExpensePage />} />
+          <Route path="/loans" element={<LoanPage />} />
+          <Route path="/budgetParameters" element={<BudgetParametersPage />} />
+          <Route path="/review" element={<ReviewPage />} />
+          <Route path="/script" element={<ScriptPage />} />
+        </Routes>
+      </ContentLayout>
+    </BrowserRouter>
   );
 }
 

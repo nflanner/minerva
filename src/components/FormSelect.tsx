@@ -1,4 +1,3 @@
-// components/FormSelect.tsx
 import React from 'react';
 
 interface FormSelectProps {
@@ -8,6 +7,7 @@ interface FormSelectProps {
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
   required?: boolean;
+  className?: string;  // Add this line
 }
 
 export const FormSelect: React.FC<FormSelectProps> = ({
@@ -17,6 +17,7 @@ export const FormSelect: React.FC<FormSelectProps> = ({
   onChange,
   options,
   required = false,
+  className = '', // Add default value
 }) => {
   return (
     <div>
@@ -26,8 +27,9 @@ export const FormSelect: React.FC<FormSelectProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${className}`}
       >
+        <option value="">Select...</option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>{option.label}</option>
         ))}
@@ -35,3 +37,4 @@ export const FormSelect: React.FC<FormSelectProps> = ({
     </div>
   );
 };
+
