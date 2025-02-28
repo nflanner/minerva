@@ -3,7 +3,7 @@ export const PATHS = {
   INCOME: '/income',
   EXPENSES: '/expenses',
   LOANS: '/loans',
-  BUDGET_PARAMETERS: '/budget-parameters',
+  BUDGET_PARAMETERS: '/budgetParameters',
   REVIEW: '/review',
   SCRIPT: '/script'
 } as const;
