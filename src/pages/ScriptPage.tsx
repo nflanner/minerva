@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { WizardPageWrapper } from '../components/WizardPageWrapper';
 import { Button } from '../components/Button';
 import { runBudgetScript } from '../helpers/budget';
 import { getStoreData } from '../dataStore.ts/dataStore';
-import { ResultsAccordion } from '../components/ResultsAccordion';
 import { PATHS } from '../constants/paths';
+import { BudgetAnalysis } from '../components/BudgetAnalysis';
+
+interface ScriptResults {
+  billsArray: number[];
+  incomeArray: number[];
+  checkingArray: number[];
+  savingsArray: number[];
+}
 
 export const ScriptPage: React.FC = () => {
-  const navigate = useNavigate();
   const data = getStoreData();
-  const [scriptResults, setScriptResults] = useState(null);
+  const [scriptResults, setScriptResults] = useState<ScriptResults | null>(null);
 
   const handleRunScript = () => {
-    const results = runBudgetScript(data.budgetParameters);
-    setScriptResults(results);
+    if (data.budgetParameters) {
+      const results = runBudgetScript(data.budgetParameters);
+      setScriptResults(results);
+    }
   };
 
   return (
@@ -33,11 +40,13 @@ export const ScriptPage: React.FC = () => {
           color="green" 
           onClick={handleRunScript}
           className="px-8 py-4 text-lg"
+          disabled={!data.budgetParameters}
+          disabledTooltip="Budget parameters not found"
         >
           Run Budget Analysis
         </Button>
         
-        {scriptResults && <ResultsAccordion scriptResults={scriptResults} />}
+        {scriptResults && <BudgetAnalysis results={scriptResults} />}
       </div>
     </WizardPageWrapper>
   );

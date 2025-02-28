@@ -26,7 +26,17 @@ export interface Expense extends FinancialItem {
 }
 
 export interface Income extends FinancialItem {
-  // Additional income-specific properties can be added here
+  nextPayDate?: {
+    month: number;
+    day: number;
+  };
+}
+
+export interface ValidatedIncome extends FinancialItem {
+  nextPayDate: {
+    month: number;
+    day: number;
+  };
 }
 
 export interface LoanCardType {
@@ -55,5 +65,4 @@ export interface BudgetParameters {
   currentChecking: number;
   desiredDepositAmount: number;
   desiredCheckingMin: number;
-  incomePayDates: {[key: string]: {month: number, day: number}};
 }

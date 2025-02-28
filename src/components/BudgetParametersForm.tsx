@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { FormInput } from './FormInput';
 import { FormSelect } from './FormSelect';
 import { getStoreData, subscribeToStore, updateStoreData } from '../dataStore.ts/dataStore';
-import { Income, BudgetParameters, Cadence } from '../schema/schema';
+import { Income, BudgetParameters } from '../schema/schema';
 import { Month, monthConfig, monthOptions, getDayOptions } from '../helpers/helpers';
 import { LocalData } from '../services/dataService';
+import { updateIncome } from '../services/incomeServices';
 
 export const BudgetParametersForm: React.FC = () => {
   const [storeData, setStoreData] = useState(getStoreData());
@@ -22,21 +23,11 @@ export const BudgetParametersForm: React.FC = () => {
   const [desiredCheckingMin, setDesiredCheckingMin] = useState<string>(
     existingParameters?.desiredCheckingMin?.toString() || ''
   );
-  const [incomePayDates, setIncomePayDates] = useState<{[key: string]: {month: number, day: number}}>(
-    existingParameters?.incomePayDates || {}
-  );
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
 
   useEffect(() => {
     const unsubscribe = subscribeToStore((newData: LocalData) => {
       setStoreData(newData);
-      if (Object.keys(incomePayDates).length === 0) {
-        const initialDates = newData.monthlyIncome.reduce((acc, income) => {
-          acc[income.id] = { month: 0, day: 0 };
-          return acc;
-        }, {} as {[key: string]: {month: number, day: number}});
-        setIncomePayDates(initialDates);
-      }
     });
     return () => unsubscribe();
   }, []);
@@ -45,42 +36,39 @@ export const BudgetParametersForm: React.FC = () => {
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
     const currentDay = currentDate.getDate();
-  
+ 
     return monthOptions.filter(option => {
       const monthNum = parseInt(option.value);
-      
-      // For months before or equal to current month, check if any specific dates are still valid
+     
       if (monthNum <= currentMonth) {
-        return storeData.monthlyIncome.some(income => 
-          income.specificDates?.some(date => 
+        return storeData.monthlyIncome.some(income =>
+          income.specificDates?.some(date =>
             (monthNum === currentMonth && date > currentDay) ||
             monthNum > currentMonth
           )
         );
       }
-      
-      // Show next two months
+     
       return monthNum <= currentMonth + 2;
     });
   };
 
-  const getValidDayOptions = (month: number, income: Income) => {
+  const getValidDayOptions = (income: Income) => {
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
     const currentDay = currentDate.getDate();
-    
+    const month = income.nextPayDate?.month || Month.January;
+   
     let days = getDayOptions(month);
-    
-    // If selected month is current month, only show future dates
+   
     if (month === currentMonth) {
       days = days.filter(day => parseInt(day.value) > currentDay);
     }
-    
-    // Filter by specific dates if they exist
+   
     if (income.specificDates && income.specificDates.length > 0) {
       days = days.filter(day => income.specificDates?.includes(parseInt(day.value)));
     }
-    
+   
     return days;
   };
 
@@ -89,8 +77,7 @@ export const BudgetParametersForm: React.FC = () => {
       currentSavings: parseFloat(currentSavings || '0'),
       currentChecking: parseFloat(currentChecking || '0'),
       desiredDepositAmount: parseFloat(desiredDepositAmount || '0'),
-      desiredCheckingMin: parseFloat(desiredCheckingMin || '0'),
-      incomePayDates
+      desiredCheckingMin: parseFloat(desiredCheckingMin || '0')
     };
 
     const updatedData = {
@@ -102,45 +89,41 @@ export const BudgetParametersForm: React.FC = () => {
   };
 
   const handleIncomePayDateChange = (incomeId: string, field: 'month' | 'day', value: string) => {
-    const numValue = value === '' ? 0 : parseInt(value);
+    const numValue = value === '' ? 1 : parseInt(value);
     const errorKey = `${incomeId}-${field}`;
-
-    if (value === '') {
-      setIncomePayDates(prev => ({
-        ...prev,
-        [incomeId]: { ...prev[incomeId], [field]: 0 }
-      }));
-      setValidationErrors(prev => ({ ...prev, [errorKey]: '' }));
-    } else if (field === 'month') {
+    const income = storeData.monthlyIncome.find(inc => inc.id === incomeId);
+  
+    if (!income) return;
+  
+    // Ensure nextPayDate is always initialized
+    if (!income.nextPayDate) {
+      income.nextPayDate = { month: 1, day: 1 };
+    }
+  
+    if (field === 'month') {
       if (numValue >= Month.January && numValue <= Month.December) {
-        setIncomePayDates(prev => ({
-          ...prev,
-          [incomeId]: { ...prev[incomeId], month: numValue }
-        }));
+        income.nextPayDate = { ...income.nextPayDate, month: numValue };
         setValidationErrors(prev => ({ ...prev, [errorKey]: '' }));
       } else {
         setValidationErrors(prev => ({ ...prev, [errorKey]: 'Please select a valid month' }));
       }
-    } else if (field === 'day') {
-      const month = incomePayDates[incomeId]?.month || Month.January;
+    } else {
+      const month = income.nextPayDate.month;
       const maxDays = monthConfig[month as Month].days;
       
       if (numValue >= 1 && numValue <= maxDays) {
-        setIncomePayDates(prev => ({
-          ...prev,
-          [incomeId]: { ...prev[incomeId], day: numValue }
-        }));
+        income.nextPayDate = { ...income.nextPayDate, day: numValue };
         setValidationErrors(prev => ({ ...prev, [errorKey]: '' }));
       } else {
-        setValidationErrors(prev => ({ 
-          ...prev, 
-          [errorKey]: `Please select a valid day (1-${maxDays})` 
+        setValidationErrors(prev => ({
+          ...prev,
+          [errorKey]: `Please select a valid day (1-${maxDays})`
         }));
       }
     }
-
-    handleFormChange();
-  };
+  
+    updateIncome(income);
+  };  
 
   return (
     <div className="space-y-4" onChange={handleFormChange}>
@@ -194,7 +177,7 @@ export const BudgetParametersForm: React.FC = () => {
                 <FormSelect
                   label="Month"
                   id={`${income.id}-month`}
-                  value={incomePayDates[income.id]?.month.toString()}
+                  value={String(income.nextPayDate?.month || '')}
                   onChange={(value) => handleIncomePayDateChange(income.id, 'month', value)}
                   options={getCurrentMonthOptions()}
                   required
@@ -203,9 +186,9 @@ export const BudgetParametersForm: React.FC = () => {
                 <FormSelect
                   label="Day"
                   id={`${income.id}-day`}
-                  value={incomePayDates[income.id]?.day.toString()}
+                  value={String(income.nextPayDate?.day || '')}
                   onChange={(value) => handleIncomePayDateChange(income.id, 'day', value)}
-                  options={getValidDayOptions(incomePayDates[income.id]?.month || 1, income)}
+                  options={getValidDayOptions(income)}
                   required
                   className="w-[100px]"
                 />

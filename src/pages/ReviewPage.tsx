@@ -60,8 +60,8 @@ export const ReviewPage: React.FC = () => {
                       <span className="text-xs text-gray-500">({income.cadence})</span>
                     </div>
                     <span className="text-sm">
-                      {parameters?.incomePayDates[income.id]?.month}/
-                      {parameters?.incomePayDates[income.id]?.day}
+                      {income.nextPayDate?.month}/
+                      {income.nextPayDate?.day}
                     </span>
                   </div>
                 ))}
