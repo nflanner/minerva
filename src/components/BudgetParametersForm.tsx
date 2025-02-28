@@ -72,21 +72,29 @@ export const BudgetParametersForm: React.FC = () => {
     return days;
   };
 
-  const handleFormChange = () => {
+  useEffect(() => {
     const newParameters: BudgetParameters = {
       currentSavings: parseFloat(currentSavings || '0'),
       currentChecking: parseFloat(currentChecking || '0'),
       desiredDepositAmount: parseFloat(desiredDepositAmount || '0'),
       desiredCheckingMin: parseFloat(desiredCheckingMin || '0')
     };
-
-    const updatedData = {
-      ...storeData,
-      budgetParameters: newParameters
-    };
-
-    updateStoreData(updatedData);
-  };
+  
+    // Check if any values have actually changed
+    const hasChanges = 
+      newParameters.currentSavings !== existingParameters?.currentSavings ||
+      newParameters.currentChecking !== existingParameters?.currentChecking ||
+      newParameters.desiredDepositAmount !== existingParameters?.desiredDepositAmount ||
+      newParameters.desiredCheckingMin !== existingParameters?.desiredCheckingMin;
+  
+    if (hasChanges) {
+      const updatedData = {
+        ...storeData,
+        budgetParameters: newParameters
+      };
+      updateStoreData(updatedData);
+    }
+  }, [currentSavings, currentChecking, desiredDepositAmount, desiredCheckingMin, storeData, existingParameters]);  
 
   const handleIncomePayDateChange = (incomeId: string, field: 'month' | 'day', value: string) => {
     const numValue = value === '' ? 1 : parseInt(value);
@@ -126,7 +134,7 @@ export const BudgetParametersForm: React.FC = () => {
   };  
 
   return (
-    <div className="space-y-4" onChange={handleFormChange}>
+    <div className="space-y-4">
       <FormInput
         label="Current Savings"
         id="current-savings"
@@ -160,7 +168,7 @@ export const BudgetParametersForm: React.FC = () => {
         value={desiredCheckingMin}
         onChange={setDesiredCheckingMin}
         required
-        pattern="^\d*\.?\d+$"
+        pattern="^\d*\.?\d*$"
         title="Please enter a valid positive number"
       />
 
