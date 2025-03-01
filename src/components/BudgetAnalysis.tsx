@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Chart } from 'chart.js/auto';
 import { DepositScheduleTable } from './DepositScheduleTable';
 import { getStoreData } from '../dataStore.ts/dataStore';
+import { Deposit } from '../schema/schema';
 
 interface BudgetAnalysisProps {
   results: {
@@ -9,6 +10,7 @@ interface BudgetAnalysisProps {
     savingsArray: number[];
     billsArray: number[];
     incomeArray: number[];
+    depositsArray: Deposit[];
   };
 }
 
@@ -66,11 +68,7 @@ export const BudgetAnalysis: React.FC<BudgetAnalysisProps> = ({ results }) => {
       </div>
       <div>
         <h3 className="text-lg font-bold mb-4">Deposit Schedule</h3>
-        <DepositScheduleTable 
-          checkingArray={results.checkingArray}
-          savingsArray={results.savingsArray}
-          desiredDepositAmount={depositAmount}
-        />
+        <DepositScheduleTable depositsArray={results.depositsArray} />
       </div>
     </div>
   );

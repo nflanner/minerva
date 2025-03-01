@@ -1,5 +1,4 @@
 import { getStoreData } from "../dataStore.ts/dataStore";
-import { BudgetLogger } from "./BudgetLogger";
 import { calculateDailyBalances, processExpenses, processIncomes, processLoans } from "./helpers";
 import { ScriptInputs } from '../types';
 
@@ -9,9 +8,6 @@ export function runBudgetScript(inputs: ScriptInputs) {
   const { currentSavings, currentChecking, desiredDepositAmount, desiredCheckingMin } = inputs;
 
   const daysInYear = 365;
-  const startDate = new Date();
-
-  BudgetLogger.logInitialData({ loans, monthlyExpenses, monthlyIncome, ...inputs });
 
   const expensePayments = processExpenses(monthlyExpenses, daysInYear);
   const loanPayments = processLoans(loans, daysInYear);
@@ -19,7 +15,7 @@ export function runBudgetScript(inputs: ScriptInputs) {
 
   const billsArray = expensePayments.map((exp, i) => exp + loanPayments[i]);
 
-  const { checkingArray, savingsArray } = calculateDailyBalances(
+  const { checkingArray, savingsArray, depositsArray } = calculateDailyBalances(
     incomeArray,
     billsArray,
     currentChecking,
@@ -28,12 +24,11 @@ export function runBudgetScript(inputs: ScriptInputs) {
     desiredCheckingMin
   );
 
-  BudgetLogger.logFinalResults({ billsArray, incomeArray, checkingArray, savingsArray });
-
   return {
     billsArray,
     incomeArray,
     checkingArray,
-    savingsArray
+    savingsArray,
+    depositsArray
   };
 }

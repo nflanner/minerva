@@ -66,3 +66,13 @@ export interface BudgetParameters {
   desiredDepositAmount: number;
   desiredCheckingMin: number;
 }
+
+export interface Deposit {
+  date: number;
+  amount: number;
+  savingsBefore: number;
+  savingsAfter: number;
+  checkingBefore: number;
+  checkingAfter: number;
+  totalAfter: number;
+}

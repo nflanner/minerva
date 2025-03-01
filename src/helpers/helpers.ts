@@ -1,4 +1,4 @@
-import { FinancialItem, Cadence, Loan, Income, ValidatedIncome } from "../schema/schema";
+import { FinancialItem, Cadence, Loan, Income, ValidatedIncome, Deposit } from "../schema/schema";
 import { BudgetLogger } from "./BudgetLogger";
 
 export function generateGuid(): string {
@@ -178,6 +178,13 @@ export function processIncomes(incomes: Income[], daysInYear: number): number[] 
   const startDate = new Date();
   const incomeArray = new Array(daysInYear).fill(0);
 
+  validatedIncomes.forEach((income) => {
+    console.log(`Processing income: ${income.name}`);
+    switch (income.cadence) {
+      // ... existing cases ...
+    }
+  });
+
   const processDailyIncome = (income: ValidatedIncome) => {
     for (let i = 0; i < daysInYear; i++) {
       incomeArray[i] += income.cadenceAmount;
@@ -258,6 +265,13 @@ export function processIncomes(incomes: Income[], daysInYear: number): number[] 
     }
   });
 
+  // Add these logs
+  console.log('Income Array Summary:');
+  console.log('Total days with income:', incomeArray.filter(amount => amount > 0).length);
+  console.log('Total income sum:', incomeArray.reduce((sum, amount) => sum + amount, 0));
+  console.log('Income days:', incomeArray.map((amount, index) => amount > 0 ? `Day ${index}: $${amount}` : null).filter(Boolean));
+
+
   return incomeArray;
 }
 
@@ -268,10 +282,11 @@ export function calculateDailyBalances(
   initialSavings: number,
   desiredDepositAmount: number,
   desiredCheckingMin: number
-): { checkingArray: number[], savingsArray: number[] } {
+): { checkingArray: number[], savingsArray: number[], depositsArray: Deposit[] } {
   const daysInYear = incomeArray.length;
   const checkingArray = new Array(daysInYear).fill(initialChecking);
   const savingsArray = new Array(daysInYear).fill(initialSavings);
+  const depositsArray: Deposit[] = [];
 
   for (let i = 0; i < daysInYear; i++) {
     if (i > 0) {
@@ -279,29 +294,34 @@ export function calculateDailyBalances(
       savingsArray[i] = savingsArray[i-1];
     }
     
+    // Add income
     checkingArray[i] += incomeArray[i];
     
-    // Only process bills if we'll maintain minimum balance
-    if (checkingArray[i] - billsArray[i] >= desiredCheckingMin) {
-      checkingArray[i] -= billsArray[i];
-    } else {
-      // Pull from savings if needed to maintain minimum
-      const shortfall = desiredCheckingMin - (checkingArray[i] - billsArray[i]);
-      if (savingsArray[i] >= shortfall) {
-        savingsArray[i] -= shortfall;
-        checkingArray[i] += shortfall;
-        checkingArray[i] -= billsArray[i];
-      }
+    // Process bills
+    checkingArray[i] -= billsArray[i];
+
+    // Pull from savings if checking goes negative
+    if (checkingArray[i] < 0 && savingsArray[i] > 0) {
+      const transferAmount = Math.min(-checkingArray[i], savingsArray[i]);
+      savingsArray[i] -= transferAmount;
+      checkingArray[i] += transferAmount;
     }
     
-    // Process savings deposit only if we maintain minimum checking
+    // Process savings deposit if we have enough in checking
     if (checkingArray[i] - desiredDepositAmount >= desiredCheckingMin) {
+      depositsArray.push({
+        date: i,
+        amount: desiredDepositAmount,
+        savingsBefore: savingsArray[i],
+        savingsAfter: savingsArray[i] + desiredDepositAmount,
+        checkingBefore: checkingArray[i],
+        checkingAfter: checkingArray[i] - desiredDepositAmount,
+        totalAfter: (savingsArray[i] + desiredDepositAmount) + (checkingArray[i] - desiredDepositAmount)
+      });
       savingsArray[i] += desiredDepositAmount;
       checkingArray[i] -= desiredDepositAmount;
     }
   }
 
-  return { checkingArray, savingsArray };
+  return { checkingArray, savingsArray, depositsArray };
 }
-
-
