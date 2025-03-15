@@ -3,6 +3,7 @@
 ## Features
 - [ ] Loan Burndown (update app structure on review page?)
 - [ ] Integrate AI for budget help/planning (update app structure on review page?)
+- [ ] Add error boundary
 
 ## UI Improvements
 - [ ] Card border enhancements
