@@ -28,8 +28,9 @@ export const WizardPageWrapper: React.FC<WizardPageWrapperProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div className="p-4 relative min-h-[calc(100vh-4rem)]">
-      <div className="flex justify-between items-center mb-4">
+    <div className="p-4 min-h-[calc(100vh-4rem)] relative w-full">
+      {/* this is janky as hell - fix the padding for the fixed title/buttons section */}
+      <div className="flex justify-between items-center mb-6 fixed top-16 w-full bg-white z-10 pr-12 pt-4 pb-4">
         <h1 className="text-2xl font-bold">{title}</h1>
         <div className="flex space-x-4">
           {previousPath && (
@@ -44,6 +45,7 @@ export const WizardPageWrapper: React.FC<WizardPageWrapperProps> = ({
           )}
         </div>
       </div>
+
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-3 text-gray-700">{overviewSubtitle}</h2>
         <div className="text-gray-600">
