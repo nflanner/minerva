@@ -6,7 +6,11 @@
 
 ## UI Improvements
 - [ ] Card border enhancements
-- [ ] Sticky next/previous buttons
+- [X] Sticky next/previous buttons
+- [ ] Clean up sticky next/previous buttons - currently have a hacky fix that works for the moment
+- [ ] Add upload error handling
+- [ ] Add specific file location for local saves so user doesnt have to search for a json file
+- [ ] Add page gating based relevent off data validation
 
 ## Data Management
 - [ ] Add more here
