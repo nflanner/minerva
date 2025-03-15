@@ -12,6 +12,7 @@
 - [ ] Add upload error handling
 - [ ] Add specific file location for local saves so user doesnt have to search for a json file
 - [ ] Add page gating based relevent off data validation
+- [ ] Add custom logo instead of vite
 
 ## Data Management
 - [ ] Add more here
