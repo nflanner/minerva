@@ -54,6 +54,8 @@ export const IncomePage: React.FC = () => {
     updateIncomeData();
   };
 
+  throw new Error('Testing error boundary');
+
   return (
     <WizardPageWrapper
       title="Income Information"

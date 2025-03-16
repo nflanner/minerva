@@ -7,9 +7,17 @@ interface ModalProps {
   onSubmit?: (...args: any[]) => void;
   title: string;
   children: ReactNode;
+  customActions?: ReactNode;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, children }) => {
+export const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  title,
+  children,
+  customActions,
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -26,22 +34,19 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, 
         <div className="p-4">
           {children}
         </div>
-        {!!onSubmit && (
-          <div className="flex justify-end p-4 border-t">
-            <Button 
-              color="white"
-              onClick={onClose}
-            >
-              Cancel
-            </Button>
-            <Button 
-              color="blue"
-              onClick={onSubmit}
-            >
-              Submit
-            </Button>
-          </div>
-        )}
+        {!!customActions
+          ? customActions 
+          : !!onSubmit && (
+            <div className="flex justify-end p-4 border-t">
+              <Button color="white" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button color="blue" onClick={onSubmit}>
+                Submit
+              </Button>
+            </div>
+          )
+        }
       </div>
     </div>
   );
