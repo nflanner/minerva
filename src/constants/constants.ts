@@ -1,0 +1,1 @@
+export const TEMP_DATA_KEY = "minerva-temp-data"
